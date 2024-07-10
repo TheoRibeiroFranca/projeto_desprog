@@ -425,6 +425,9 @@ function processParagraph(document, element, dirname, prefix) {
             removable.push(...processChildren(document, element, dirname, prefix));
         }
     }
+    if (innerHTML.includes('.md')) {
+        element.innerHTML = innerHTML.replace(/\.md\b/g, '.html');
+    }
 
     return removable;
 }
