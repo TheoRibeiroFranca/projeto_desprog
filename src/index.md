@@ -41,24 +41,20 @@ bruta do algoritimo ingênuo.
 ## Aprofundando no Algoritimo ingênuo
 
 
-Tendo visto o problema como um todo, vamos entender o princípio básico de busca por padrões, a "força bruta".
-Pensemos, primeiro, na abordagem de busca de padrão mais simples, que é, dado um padrão desejado, vamos buscar um trecho 
-onde a ordem e o número de caracteres seja extamente igual ao do padrão desejado.  
+Tendo visto o problema como um todo, vamos entender o princípio básico de busca por padrões, a **"força bruta"**.
+Pensemos, primeiro, no princípio mais alto nível de busca por padrões. 
 
+??? Testando para ver se você está acordado
 
-??? Exercício
-
-Dado esse princípio de funcionamento, pense em quais argumentos o algoritimo ingênuo recebe: `void algoritimo_ingenuo(???){...}`
+Dado que você quer contar quantas vezes aparece uma sílaba em um texto quaisquer, de quais informações você precisa para realizar a busca? 
 
 
 
 
 ::: Gabarito
 
-Como você deve ter imaginado, ele não precisa receber muitas coisas, apenas as 2 strings e seus tamanhos:
 
-
-`void algoritimo_ingênuo(char string[], char substring[], int n, int m){...}`
+A Resposta é óbvia: Precisamos apenas do **texto e do padrão buscado**. No caso do algoritimo em C, ele precisa de uma informação a mais: **O Tamanho do texto e do padrão textual buscado**
 
 
 
@@ -67,25 +63,67 @@ Como você deve ter imaginado, ele não precisa receber muitas coisas, apenas as
 ???
 
 
-Agora vamos desenvolver mais este código e tentar montar a estrutura do loop principal do algoritimo.
-Pensando no princípio de funcionamento do algoritmo, temos que ele percorre toda a string principal, já tendo uma sequência desejada (o padrão).Se o caractere atual da string não for compatível com o primeiro caractere do padrão, o algoritmo simplesmente avança para a próxima posição, pois já se sabe que não há um padrão começando ali.
-
-
-Em alto nível, essa seria a descrição que se adequaria da melhor forma em algo como: 
+Logo, iniciando a contrução do código em C, começamos com algo como:
 
 ``` c
 
 void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    // para cada i em (0, 1, 2, ..., n - m)
-    //    verifica se a substring ocorre a partir da posição i
-    //    se for igual ao primeiro algoritimo da substring, a sequência inicia
+    // ???
 }
 
 
 ```
 
+??? Exercício Conceitual 1
 
-Iniciar com o loop principal é um bom começo, mas não demora muito até percebermos que o código não consegue indentificar onde termina, precisamos de outro índice para isso, verificando a compatibilidade do início ao fim. Assim, precisamos expandir o raciocínio para algo como:
+Antes de inicarmos a construção do loop do código, precisamos exercitar o nosso pensamento. Dessa forma, dado as seguintes sequências de caracteres, identifique o padrão sequencial presente: 
+
+**1.AAABBBAAABBB** <br>
+**2.ABBAABBA** <br>
+**3.XYYXYYYXYYY** <br> 
+
+
+::: Gabarito
+
+**Resposta 1:** AAABBB<br> 
+**Resposta 2:** AAABBB<br>
+**Resposta 3:** XYYY<br>
+
+:::
+
+???
+
+
+Mas o nosso objetivo aqui obviamente não é te fazer saber indentificar padrões, na verdade, é pensar em como traduzir esse 
+raciocínio para o algoritimo. 
+
+??? Exercício Conceitual 2
+
+Dessa forma, além de pensar no padrão, quero que pense: A partir de qual linha de raciocínio podemos achar padrões da maneira 
+mais acurada e demorada? 
+
+
+**A)** Observar apenas se os primeiros e últimos caracteres da sequência se repetem, como em ACBA <br>
+**B)** Contar quantas vezes cada letra aparece e escolher a que aparece mais <br>
+**C)** Testar todas as formas possíveis de dividir a sequência em blocos e ver quais se repetem ao longo dela <br>
+**D)** Olhar apenas pares de letras vizinhas, como AB, BC, CD, e tentar construir o padrão a partir deles <br>
+
+
+::: Gabarito
+
+**C)** Testar todas as formas possíveis de dividir a sequência em blocos e ver quais se repetem ao longo dela <br> 
+
+:::
+
+???
+
+O Algoritimo ingênuo atua justamente nessa abordagem **força bruta**, o qual ele irá: 
+- Percorrer todo o texto dado; 
+- Comparar o caractere percorrido com o primeiro caractere da substring;
+- Caso os caracteres sejam iguais, compara o segundo caractere da substring com o caractere percorrido, e assim sucessivamente;
+- Caso o padrão da substring seja interrompido, volta ao caractere percorrido antes de encontrar alguma string da sequência. 
+
+A Partir dessa estrutura, temos um pensamento em alto nível parecido com: 
 
 ``` c
 
@@ -102,81 +140,86 @@ void algoritimo_ingenuo(char string[], char substring[], int n, int m){
 
 ```
 
-Assim, o comportamento do código é algo como:
+??? Exercício Conceitual 3
+
+Beleza, prepare o papel e o lápis e vamos passar por uma tarefa um pouco mais trabalhosa. Dado a seguinte sequência **AABABBABA**, e o padrão desejado **BBA**,
+simule os valores de i e j para cada uma das iterações do **loop interno**.
+
+::: Gabarito
+
+```plaintext
+1:   0 0 
+2:   1 0
+3:   2 0
+4:   2 1
+5:   3 0
+6:   4 0
+7:   4 1
+8:   4 2
+9:   5 1
+10:  6 0  
+```
+Perceba que, como a nossa sequência tem 3 caracteres, e, quando chegamos em i = 2 = m - 1, encontramos a única presença do padrão nesse trecho!
+
+:::
+
+???
 
 
+Ao ilustrar essas iterações, seria algo como: 
 
 :ingenuo_01
 
 
-
-??? Exercício
-
-
-Bom, você já tem a faca e o queijo na mão para implementar o algoritimo ingênuo, então mãos à massa!
+Ok, já vimos que esse algoritimo entrega acurácia, mesmo que com construções demoradas, mas então, qual o problema dele? 
 
 
+??? Exercício Conceitual 4
 
-``` c
-
-void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    // complete a função!
-}
-
-```
-
-
-
-
-
+A melhor forma de explicar isso é elevando o nível de  dificuldade. Dessa forma, dado a sequência **AAAABAAAAAABBAAB** e o padrão desejado **AAABA**, estime apenas o 
+**número de iterações do loop interno**
 
 ::: Gabarito
 
-
-``` c
-
-void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    for (int i = 0; i <= n - m; i++) {
-        for (int j = 0; j < m; j++) {
-            if (string[i + j] != substring[j]){
-                break;
-            }
-            if (j == m - 1) {
-                printf("Padrão encontrado na posição %d\n", i);
-            }
-        }
-    }
-}
-
-```
-
-
-:::
-???
-
-
-
-Olhando só para exemplos mais simples, parece tranquilo,né? Mas, pensemos para casos expandidos (e mais próximos da realidade), com strings superiores 
-a 15 caracteres, e com baixa compatibilidade de sequência, a força bruta performaria rapidamente? 
-
+Nessa situação teríamos **38 iterações** do loop interno, isso para um sequência de apenas 16 caracteres, o que já resultaria em um loop interno mais extenso.
 
 :ingenuo_02
 
+:::
 
-Agora, imaginemos para uma sequência de DNA,teríamos um consumo de memória absurdo!
 
+
+
+
+
+??? 
+
+Se para uma sequência de poucos caracteres já parece exaustivo, imagine para casos mais complexos, como sequências de DNA, por exemplo! Isso nos leva para o principal 
+problema do algoritimo: sua complexidade no tempo. O que o torna uma alternativa pouco versátil para soluções mais robustas. 
 
 ??? Exercício
 
 
-Para concretizar essa linha de pensamento, pense rapidamente na complexidade desse algoritimo
+Para concretizar essa linha de pensamento, a partir da descrição em alto nível, qual a complexidade do algoritimo ingênuo? 
+
+``` c
+
+void algoritimo_ingenuo(char string[], char substring[], int n, int m){
+    // para cada i em (0, 1, 2, ..., n - m)
+    //     verifica se a substring ocorre a partir da posição i
+    //     para cada j em (0, 1, 2, ..., m - 1)
+    //         se string[i + j] ≠ substring[j]
+    //             interrompe a verificação (não é uma ocorrência)
+    //     se todos os caracteres da substring foram verificados com sucesso
+    //         registra a posição i como ocorrência do padrão
+}
 
 
-
+```
 
 ::: Gabarito
 
-Como o algoritmo ingênuo compara cada posição da string principal, e em cada posição tenta casar a substring. Se a string principal tem tamanho *n* e a substring tem tamanho *m*, a complexidade no pior caso é \(O(nm) \).
+Como o algoritmo ingênuo compara cada posição da string principal, e em cada posição tenta casar a substring. Se a string principal tem tamanho **n** e a substring tem tamanho **m**, a complexidade no pior caso é **O(n*m)**.
 
 
 
@@ -185,7 +228,13 @@ Como o algoritmo ingênuo compara cada posição da string principal, e em cada 
 
 
 
-Percebe-se então,um problema bem aparente neste algoritimo, a sua redundância nas comparações. Quando uma incompatibilidade (mismatch) ocorre, o algoritmo simplesmente avança para a próxima posição na string principal e reinicia a comparação da substring do início, revisitando caracteres que já foram analisados.Dessa forma, temos um claro problema de eficiência, mas, e se o nosso código conseguisse "pular" regiões sem padrão da string? É aí que entra o algoritimo KMP.
+Percebe-se então, um problema bem aparente neste algoritimo, a sua redundância nas comparações. Quando uma incompatibilidade (mismatch) ocorre, o algoritmo simplesmente avança para a próxima posição na string principal e reinicia a comparação da substring do início, revisitando caracteres que já foram analisados.
+
+Aqui esta mais uma animação para reforçar mais ainda esse defeito:
+
+:imgs-kmp-ingenuo-1
+
+Bom, dessa forma, fica claro que existe um problema de eficiência neste algoritimo, o que nos faz pensar, como será que podemos melhorar para que ele seja menos redundante?
 
 ##  O KMP
 
@@ -195,8 +244,16 @@ Bom, já ficou bem claro que o problema do Ingênuo é que ele demora porque sem
 
 Como podemos fazer o algoritmo não perder progresso?
 
+**A)** Pulando os caracteres que o algoritmo já sabe que estão corretos, usando informações do padrão.
+
+**B)** Repetindo a comparação desde o início do padrão sempre que houver erro, garantindo que nenhum caractere seja ignorado.
+
+**C)** Adicionando caracteres aleatórios ao padrão para tentar encontrar correspondências mais rapidamente.
+
+**D)**  Ignorando todos os prefixos do padrão após um erro e iniciando a busca diretamente do próximo caractere do texto.
+
 ::: Gabarito
-Pulando caracteres que ele sabe que estão corretos.
+**A)** Pulando os caracteres que o algoritmo já sabe que estão corretos, usando informações do padrão
 :::
 
 ???

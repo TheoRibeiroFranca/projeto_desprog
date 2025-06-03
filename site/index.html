@@ -49,100 +49,145 @@ com sequências longas e repetitivas — como ocorre em genomas.</p>
 <p>Dessa forma, precisamos entender o princípio por trás desses algoritimos para solucionarmos o problema,e, por isso, começaremos com a força
 bruta do algoritimo ingênuo.</p>
 <h2>Aprofundando no Algoritimo ingênuo</h2>
-<p>Antes de estudarmos o algoritmo KMP, vamos entender como funciona o principio de análise
-de padrões de strings utilizando o algoritmo ingênuo e como o algoritmo KMP resolve o principal problema dele.</p>
-<p>Assim como o KMP, o algoritimo ingênuo também é utilizado para procurar padroẽs em strings.
-Neste caso, o algoritimo ingênuo realiza esta busca utilizando uma método de “brute force”,
-ou seja, ele testa todas as combinações possiveis para encontrar padrões.</p>
+<p>Tendo visto o problema como um todo, vamos entender o princípio básico de busca por padrões, a <strong>“força bruta”</strong>.
+Pensemos, primeiro, no princípio mais alto nível de busca por padrões.</p>
 <blockquote class="question">
-<p>Exercício</p>
-<p>Com o contexto de como o algoritimo funciona, pense quais argumentos o algoritmo ingênuo deve
-receber para seu funcionemento: <code class="language-void">algoritimo_ingenuo(???){...}</code>.</p>
+<p>Testando para ver se você está acordado</p>
+<p>Dado que você quer contar quantas vezes aparece uma sílaba em um texto quaisquer, de quais informações você precisa para realizar a busca?</p>
 <details class="answer">
 <summary>Gabarito</summary>
-<p>Como você deve ter imaginado, ele não precisa receber muitas coisas, apenas as 2 strings e seus tamanhos:</p>
-<p><code class="language-void">algoritimo_ingênuo(char string[], char substring[], int n, int m){...}</code></p>
+<p>A Resposta é óbvia: Precisamos apenas do <strong>texto e do padrão buscado</strong>. No caso do algoritimo em C, ele precisa de uma informação a mais: <strong>O Tamanho do texto e do padrão textual buscado</strong></p>
 </details>
 </blockquote>
-<p>Agora vamos desenvolver mais este código e tentar montar a estrutura do loop principal do algoritimo:</p>
+<p>Logo, iniciando a contrução do código em C, começamos com algo como:</p>
 <pre><code class="language-c">
 void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    for(int i = 0; i &lt; n - m; i++){
-        // loop para percorrer a string
-    }
+    // ???
 }
+
 
 </code></pre>
 <blockquote class="question">
-<p>Exercício</p>
-<p>Completando um pouco mais o código, chegamos dentro do loop de comparação das strings:</p>
-<pre><code class="language-c">
-void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    for(int i = 0; i &lt; n - m; i++){
-        for (int j = 0; j &lt; m; j++) {
-            //loop de comparação
-        }
-    }
-}
-
-</code></pre>
-<p>Usando o código fornecido, tente desenvolver o conteúdo deste loop para que ele continue realizando as
-comparações de caractéres das strings enquanto elas estiverem iguais.</p>
+<p>Exercício Conceitual 1</p>
+<p>Antes de inicarmos a construção do loop do código, precisamos exercitar o nosso pensamento. Dessa forma, dado as seguintes sequências de caracteres, identifique o padrão sequencial presente:</p>
+<p><strong>1.AAABBBAAABBB</strong> <br>
+<strong>2.ABBAABBA</strong> <br>
+<strong>3.XYYXYYYXYYY</strong> <br></p>
 <details class="answer">
 <summary>Gabarito</summary>
-<pre><code class="language-c">
-void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    for (int i = 0; i &lt;= n - m; i++) {
-        for (int j = 0; j &lt; m; j++) {
-            if (string[i + j] != substring[j]){
-                break;
-            }
-        }
-    }
-}
-
-</code></pre>
+<p><strong>Resposta 1:</strong> AAABBB<br>
+<strong>Resposta 2:</strong> AAABBB<br>
+<strong>Resposta 3:</strong> XYYY<br></p>
 </details>
 </blockquote>
-<p>Com a comparação de caractéres feita dentro do loop, apenas precisamos complemetar o codigo para
-que ele nos devolva os indices onde o padrão foi encontrado:</p>
+<p>Mas o nosso objetivo aqui obviamente não é te fazer saber indentificar padrões, na verdade, é pensar em como traduzir esse
+raciocínio para o algoritimo.</p>
+<blockquote class="question">
+<p>Exercício Conceitual 2</p>
+<p>Dessa forma, além de pensar no padrão, quero que pense: A partir de qual linha de raciocínio podemos achar padrões da maneira
+mais acurada e demorada?</p>
+<p><strong>A)</strong> Observar apenas se os primeiros e últimos caracteres da sequência se repetem, como em ACBA <br>
+<strong>B)</strong> Contar quantas vezes cada letra aparece e escolher a que aparece mais <br>
+<strong>C)</strong> Testar todas as formas possíveis de dividir a sequência em blocos e ver quais se repetem ao longo dela <br>
+<strong>D)</strong> Olhar apenas pares de letras vizinhas, como AB, BC, CD, e tentar construir o padrão a partir deles <br></p>
+<details class="answer">
+<summary>Gabarito</summary>
+<p><strong>C)</strong> Testar todas as formas possíveis de dividir a sequência em blocos e ver quais se repetem ao longo dela <br></p>
+</details>
+</blockquote>
+<p>O Algoritimo ingênuo atua justamente nessa abordagem <strong>força bruta</strong>, o qual ele irá:</p>
+<ul>
+<li>Percorrer todo o texto dado;</li>
+<li>Comparar o caractere percorrido com o primeiro caractere da substring;</li>
+<li>Caso os caracteres sejam iguais, compara o segundo caractere da substring com o caractere percorrido, e assim sucessivamente;</li>
+<li>Caso o padrão da substring seja interrompido, volta ao caractere percorrido antes de encontrar alguma string da sequência.</li>
+</ul>
+<p>A Partir dessa estrutura, temos um pensamento em alto nível parecido com:</p>
 <pre><code class="language-c">
 void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    for (int i = 0; i &lt;= n - m; i++) {
-        for (int j = 0; j &lt; m; j++) {
-            if (string[i + j] != substring[j]){
-                break;
-            }
-            if (j == m - 1) {
-                printf("Padrão encontrado na posição %d\n", i);
-            }
-        }
-    }
+    // para cada i em (0, 1, 2, ..., n - m)
+    //     verifica se a substring ocorre a partir da posição i
+    //     para cada j em (0, 1, 2, ..., m - 1)
+    //         se string[i + j] ≠ substring[j]
+    //             interrompe a verificação (não é uma ocorrência)
+    //     se todos os caracteres da substring foram verificados com sucesso
+    //         registra a posição i como ocorrência do padrão
 }
 
+
 </code></pre>
-<p>Vamos ver uma simples demonstração de como ele funciona por meio da animação:</p>
+<blockquote class="question">
+<p>Exercício Conceitual 3</p>
+<p>Beleza, prepare o papel e o lápis e vamos passar por uma tarefa um pouco mais trabalhosa. Dado a seguinte sequência <strong>AABABBABA</strong>, e o padrão desejado <strong>BBA</strong>,
+simule os valores de i e j para cada uma das iterações do <strong>loop interno</strong>.</p>
+<details class="answer">
+<summary>Gabarito</summary>
+<pre><code class="language-plaintext">1:   0 0 
+2:   1 0
+3:   2 0
+4:   2 1
+5:   3 0
+6:   4 0
+7:   4 1
+8:   4 2
+9:   5 1
+10:  6 0  
+</code></pre>
+<p>Perceba que, como a nossa sequência tem 3 caracteres, e, quando chegamos em i = 2 = m - 1, encontramos a única presença do padrão nesse trecho!</p>
+</details>
+</blockquote>
+<p>Ao ilustrar essas iterações, seria algo como:</p>
 <div class="animation"><img class="frame" src="img/ingenuo_01/ingenuo01.png" alt="1"><img class="frame" src="img/ingenuo_01/ingenuo02.png" alt="2"><img class="frame" src="img/ingenuo_01/ingenuo04.png" alt="3"><img class="frame" src="img/ingenuo_01/ingenuo05.png" alt="4"><img class="frame" src="img/ingenuo_01/ingenuo06.png" alt="5"><img class="frame" src="img/ingenuo_01/ingenuo07.png" alt="6"><img class="frame" src="img/ingenuo_01/ingenuo08.png" alt="7"><img class="frame" src="img/ingenuo_01/ingenuo09.png" alt="8"><img class="frame" src="img/ingenuo_01/ingenuo10.png" alt="9"><img class="frame" src="img/ingenuo_01/ingenuo11.png" alt="10"><img class="frame" src="img/ingenuo_01/ingenuo12.png" alt="11"><img class="frame" src="img/ingenuo_01/ingenuo13.png" alt="12"></div>
+<p>Ok, já vimos que esse algoritimo entrega acurácia, mesmo que com construções demoradas, mas então, qual o problema dele?</p>
 <blockquote class="question">
-<p>Exercício</p>
-<p>Agora que estamos familiarizados com o funcionamento deste algoritimo, tente estimar qual vai ser a complexidade dele no seu pior caso.</p>
+<p>Exercício Conceitual 4</p>
+<p>A melhor forma de explicar isso é elevando o nível de  dificuldade. Dessa forma, dado a sequência <strong>AAAABAAAAAABBAAB</strong> e o padrão desejado <strong>AAABA</strong>, estime apenas o
+<strong>número de iterações do loop interno</strong></p>
 <details class="answer">
 <summary>Gabarito</summary>
-<p>Como o algoritmo ingênuo compara cada posição da string principal, e em cada posição tenta casar a substring. Se a string principal tem tamanho <em>n</em> e a substring tem tamanho <em>m</em>, a complexidade no pior caso é (O(nm) ).</p>
+<p>Nessa situação teríamos <strong>38 iterações</strong> do loop interno, isso para um sequência de apenas 16 caracteres, o que já resultaria em um loop interno mais extenso.</p>
+<div class="animation"><img class="frame" src="img/ingenuo_02/ingenuo01.png" alt="1"><img class="frame" src="img/ingenuo_02/ingenuo02.png" alt="2"><img class="frame" src="img/ingenuo_02/ingenuo03.png" alt="3"><img class="frame" src="img/ingenuo_02/ingenuo04.png" alt="4"><img class="frame" src="img/ingenuo_02/ingenuo05.png" alt="5"><img class="frame" src="img/ingenuo_02/ingenuo06.png" alt="6"><img class="frame" src="img/ingenuo_02/ingenuo07.png" alt="7"><img class="frame" src="img/ingenuo_02/ingenuo08.png" alt="8"><img class="frame" src="img/ingenuo_02/ingenuo09.png" alt="9"><img class="frame" src="img/ingenuo_02/ingenuo10.png" alt="10"><img class="frame" src="img/ingenuo_02/ingenuo11.png" alt="11"><img class="frame" src="img/ingenuo_02/ingenuo12.png" alt="12"><img class="frame" src="img/ingenuo_02/ingenuo13.png" alt="13"><img class="frame" src="img/ingenuo_02/ingenuo14.png" alt="14"><img class="frame" src="img/ingenuo_02/ingenuo15.png" alt="15"><img class="frame" src="img/ingenuo_02/ingenuo16.png" alt="16"><img class="frame" src="img/ingenuo_02/ingenuo17.png" alt="17"><img class="frame" src="img/ingenuo_02/ingenuo18.png" alt="18"><img class="frame" src="img/ingenuo_02/ingenuo19.png" alt="19"><img class="frame" src="img/ingenuo_02/ingenuo20.png" alt="20"><img class="frame" src="img/ingenuo_02/ingenuo21.png" alt="21"><img class="frame" src="img/ingenuo_02/ingenuo22.png" alt="22"><img class="frame" src="img/ingenuo_02/ingenuo23.png" alt="23"><img class="frame" src="img/ingenuo_02/ingenuo24.png" alt="24"><img class="frame" src="img/ingenuo_02/ingenuo25.png" alt="25"><img class="frame" src="img/ingenuo_02/ingenuo26.png" alt="26"><img class="frame" src="img/ingenuo_02/ingenuo27.png" alt="27"><img class="frame" src="img/ingenuo_02/ingenuo28.png" alt="28"><img class="frame" src="img/ingenuo_02/ingenuo29.png" alt="29"><img class="frame" src="img/ingenuo_02/ingenuo30.png" alt="30"><img class="frame" src="img/ingenuo_02/ingenuo31.png" alt="31"><img class="frame" src="img/ingenuo_02/ingenuo32.png" alt="32"><img class="frame" src="img/ingenuo_02/ingenuo33.png" alt="33"><img class="frame" src="img/ingenuo_02/ingenuo34.png" alt="34"><img class="frame" src="img/ingenuo_02/ingenuo35.png" alt="35"><img class="frame" src="img/ingenuo_02/ingenuo36.png" alt="36"><img class="frame" src="img/ingenuo_02/ingenuo37.png" alt="37"><img class="frame" src="img/ingenuo_02/ingenuo38.png" alt="38"></div>
 </details>
 </blockquote>
-<p>Agora vamos tentar com uma string e substring maiores:</p>
-<div class="animation"><img class="frame" src="img/ingenuo_02/ingenuo01.png" alt="1"><img class="frame" src="img/ingenuo_02/ingenuo02.png" alt="2"><img class="frame" src="img/ingenuo_02/ingenuo03.png" alt="3"><img class="frame" src="img/ingenuo_02/ingenuo04.png" alt="4"><img class="frame" src="img/ingenuo_02/ingenuo05.png" alt="5"><img class="frame" src="img/ingenuo_02/ingenuo06.png" alt="6"><img class="frame" src="img/ingenuo_02/ingenuo07.png" alt="7"><img class="frame" src="img/ingenuo_02/ingenuo08.png" alt="8"><img class="frame" src="img/ingenuo_02/ingenuo09.png" alt="9"><img class="frame" src="img/ingenuo_02/ingenuo10.png" alt="10"><img class="frame" src="img/ingenuo_02/ingenuo11.png" alt="11"><img class="frame" src="img/ingenuo_02/ingenuo12.png" alt="12"><img class="frame" src="img/ingenuo_02/ingenuo13.png" alt="13"><img class="frame" src="img/ingenuo_02/ingenuo14.png" alt="14"><img class="frame" src="img/ingenuo_02/ingenuo15.png" alt="15"><img class="frame" src="img/ingenuo_02/ingenuo16.png" alt="16"><img class="frame" src="img/ingenuo_02/ingenuo17.png" alt="17"><img class="frame" src="img/ingenuo_02/ingenuo18.png" alt="18"><img class="frame" src="img/ingenuo_02/ingenuo19.png" alt="19"><img class="frame" src="img/ingenuo_02/ingenuo20.png" alt="20"><img class="frame" src="img/ingenuo_02/ingenuo21.png" alt="21"><img class="frame" src="img/ingenuo_02/ingenuo22.png" alt="22"><img class="frame" src="img/ingenuo_02/ingenuo23.png" alt="23"><img class="frame" src="img/ingenuo_02/ingenuo24.png" alt="24"><img class="frame" src="img/ingenuo_02/ingenuo25.png" alt="25"><img class="frame" src="img/ingenuo_02/ingenuo26.png" alt="26"><img class="frame" src="img/ingenuo_02/ingenuo27.png" alt="27"><img class="frame" src="img/ingenuo_02/ingenuo28.png" alt="28"><img class="frame" src="img/ingenuo_02/ingenuo29.png" alt="29"><img class="frame" src="img/ingenuo_02/ingenuo30.png" alt="30"><img class="frame" src="img/ingenuo_02/ingenuo31.png" alt="31"><img class="frame" src="img/ingenuo_02/ingenuo32.png" alt="32"><img class="frame" src="img/ingenuo_02/ingenuo33.png" alt="33"><img class="frame" src="img/ingenuo_02/ingenuo34.png" alt="34"><img class="frame" src="img/ingenuo_02/ingenuo35.png" alt="35"><img class="frame" src="img/ingenuo_02/ingenuo36.png" alt="36"><img class="frame" src="img/ingenuo_02/ingenuo37.png" alt="37"><img class="frame" src="img/ingenuo_02/ingenuo38.png" alt="38"></div>
-<p>Como pode ser visto nas animações, existe um problema bem aparente neste algoritimo, a sua redundância nas comparações. Quando uma incompatibilidade (mismatch) ocorre, o algoritmo simplesmente avança para a próxima posição na string principal e reinicia a comparação da substring do início, revisitando caracteres que já foram analisados.</p>
-<p>Por exemplo, se uma parte da substring já foi confirmada como compatível, o algoritmo ingênuo não aproveita essa informação, resultando em comparações desnecessárias. Essa abordagem leva a uma complexidade de (O(nm)) no pior caso, tornando-o inviável para strings longas.</p>
+<p>Se para uma sequência de poucos caracteres já parece exaustivo, imagine para casos mais complexos, como sequências de DNA, por exemplo! Isso nos leva para o principal
+problema do algoritimo: sua complexidade no tempo. O que o torna uma alternativa pouco versátil para soluções mais robustas.</p>
+<blockquote class="question">
+<p>Exercício</p>
+<p>Para concretizar essa linha de pensamento, a partir da descrição em alto nível, qual a complexidade do algoritimo ingênuo?</p>
+<pre><code class="language-c">
+void algoritimo_ingenuo(char string[], char substring[], int n, int m){
+    // para cada i em (0, 1, 2, ..., n - m)
+    //     verifica se a substring ocorre a partir da posição i
+    //     para cada j em (0, 1, 2, ..., m - 1)
+    //         se string[i + j] ≠ substring[j]
+    //             interrompe a verificação (não é uma ocorrência)
+    //     se todos os caracteres da substring foram verificados com sucesso
+    //         registra a posição i como ocorrência do padrão
+}
+
+
+</code></pre>
+<details class="answer">
+<summary>Gabarito</summary>
+<p>Como o algoritmo ingênuo compara cada posição da string principal, e em cada posição tenta casar a substring. Se a string principal tem tamanho <strong>n</strong> e a substring tem tamanho <strong>m</strong>, a complexidade no pior caso é <strong>O(n*m)</strong>.</p>
+</details>
+</blockquote>
+<p>Percebe-se então, um problema bem aparente neste algoritimo, a sua redundância nas comparações. Quando uma incompatibilidade (mismatch) ocorre, o algoritmo simplesmente avança para a próxima posição na string principal e reinicia a comparação da substring do início, revisitando caracteres que já foram analisados.</p>
+<p>Aqui esta mais uma animação para reforçar mais ainda esse defeito:</p>
+<div class="animation"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-01.png" alt="1"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-02.png" alt="2"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-03.png" alt="3"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-04.png" alt="4"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-05.png" alt="5"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-06.png" alt="6"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-07.png" alt="7"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-08.png" alt="8"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-09.png" alt="9"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-10.png" alt="10"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-11.png" alt="11"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-12.png" alt="12"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-13.png" alt="13"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-14.png" alt="14"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-15.png" alt="15"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-16.png" alt="16"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-17.png" alt="17"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-18.png" alt="18"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-19.png" alt="19"><img class="frame" src="img/imgs-kmp-ingenuo-1/ingenuo-kmp-20.png" alt="20"></div>
+<p>Bom, dessa forma, fica claro que existe um problema de eficiência neste algoritimo, o que nos faz pensar, como será que podemos melhorar para que ele seja menos redundante?</p>
 <h2>O KMP</h2>
 <p>Bom, já ficou bem claro que o problema do Ingênuo é que ele demora porque sempre precisa ficar voltando quando da mismatch dentro da mesma string. É exatamente nesse ponto em que o KMP entra: como podemos fazer o algoritmo não ficar voltando quando não precisa? (dica: a resposta é bem simples)</p>
 <blockquote class="question">
 <p>Exercicio</p>
 <p>Como podemos fazer o algoritmo não perder progresso?</p>
+<p><strong>A)</strong> Pulando os caracteres que o algoritmo já sabe que estão corretos, usando informações do padrão.</p>
+<p><strong>B)</strong> Repetindo a comparação desde o início do padrão sempre que houver erro, garantindo que nenhum caractere seja ignorado.</p>
+<p><strong>C)</strong> Adicionando caracteres aleatórios ao padrão para tentar encontrar correspondências mais rapidamente.</p>
+<p><strong>D)</strong>  Ignorando todos os prefixos do padrão após um erro e iniciando a busca diretamente do próximo caractere do texto.</p>
 <details class="answer">
 <summary>Gabarito</summary>
-<p>Pulando caracteres que ele sabe que estão corretos.</p>
+<p><strong>A)</strong> Pulando os caracteres que o algoritmo já sabe que estão corretos, usando informações do padrão</p>
 </details>
 </blockquote>
 <p>Para ficar um pouco mais fácil de visualizar esse defeito:</p>
