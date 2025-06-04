@@ -205,13 +205,13 @@ Para concretizar essa linha de pensamento, a partir da descrição em alto níve
 ``` c
 
 void algoritimo_ingenuo(char string[], char substring[], int n, int m){
-    // para cada i em (0, 1, 2, ..., n - m)
-    //     verifica se a substring ocorre a partir da posição i
-    //     para cada j em (0, 1, 2, ..., m - 1)
-    //         se string[i + j] ≠ substring[j]
-    //             interrompe a verificação (não é uma ocorrência)
-    //     se todos os caracteres da substring foram verificados com sucesso
-    //         registra a posição i como ocorrência do padrão
+     para cada i em (0, 1, 2, ..., n - m)
+         verifica se a substring ocorre a partir da posição i
+         para cada j em (0, 1, 2, ..., m - 1)
+             se string[i + j] ≠ substring[j]
+                 interrompe a verificação (não é uma ocorrência)
+         se todos os caracteres da substring foram verificados com sucesso
+             registra a posição i como ocorrência do padrão
 }
 
 
@@ -262,105 +262,34 @@ Para ficar um pouco mais fácil de visualizar esse defeito:
 
 :imgs-kmp-ingenuo-1
 
-Agora ficou bem claro qual é a primeira etapa do KMP: pular "casas" quando ele sabe que não vai ocorrer match.
+Dessa forma, ao invés  de reiniciar a comparação do zero após um erro, o KMP consegue ele consegue pular diretamente para a próxima posição possível no padrão, sem voltar no texto. Isso é possível graças a uma estrutura auxiliar que armazena informações sobre o próprio padrão, permitindo que o algoritmo não repita comparações desnecessárias e avance de forma inteligente. Assim, o KMP mantém o progresso e realiza a busca com muito mais eficiência, especialmente em textos longos e padrões com repetições.
 
-Como superar as limitações do algoritmo ingênuo? A ideia central do KMP é pré-processar o padrão para criar uma estrutura que permita "pular" comparações redundantes, otimizando a busca pelo padrão ao longo da string .
-
-Agora vamos olhar para uma versão de alto nível do código do KMP:
+Dessa forma, sintetizando o algoritimo em alto nível, ele fica algo como:
 
 ``` c
 
-void kmp(char string[],int n, char substring[], int m){
-    enquanto i for menor que n, continue o processamento {
-        se string[i] for igual a substring[j]{
-            avance contador i e j
-        }
-        se j for igual a m{
-            sabemos que o padrao foi encontrado porque o tamanho maximo da substring foi atingido
-            zere j para continuar a busca
-        }
-        se i for menor que n e string[i] for diferente de substring[j]{
-            se j for igual a 0{
-                avanca i mantendo j em 0
-            }caso contrario,{
-                reinicia j, mas mantem o valor de i para nao perder o progresso
-            }
-        }
-    }
+void kmp(char string[], char substring[], int n, int m){
+    Inicializa um mecanismo auxiliar baseado no padrão para guiar os saltos
+
+     Começa a percorrer o texto com dois ponteiros: um para o texto e outro para o padrão
+
+     Enquanto ainda houver texto a ser percorrido
+         Se os caracteres do texto e do padrão coincidirem
+             Avança ambos os ponteiros
+             Se o ponteiro do padrão atingir o final
+                 Registra a posição como ocorrência
+                 Usa o mecanismo auxiliar para ajustar o ponteiro do padrão e continuar a busca
+         Se os caracteres forem diferentes
+             Se já houve algum progresso no padrão
+                 Usa o mecanismo auxiliar para reposicionar o ponteiro do padrão sem voltar no texto
+             Caso contrário
+                 Apenas avança no texto
 }
             
 ```
 
-
-
-??? Exercício
-
-
-A partir dessa descricao de alto nivel do KMP, tente escrever como seu codigo em C ficaria
-
-
-
-``` c
-
-void kmp(char string[], int n, char substring[], int m){
-
-    ...
-    
-}
-        
-```
-
-
-
-::: Gabarito
-
-
-``` c
-
-void kmp(char* string, int n, char* substring, int m) {
-    // passo 1: inicialize os indices
-    int i = 0; // indice para o string
-    int j = 0; // indice para a substring
-    
-    // passo 2: inicie um laco na string
-    while (i < n) {
-        // passo 3: compare caracteres
-        if (string[i] == substring[j]) {
-            // passo 4: se coincidem
-            i++;
-            j++;
-        }
-        
-        // passo 5: se o padrao foi encontrado
-        if (j == m) {
-            printf("padrao encontrado na posicao %d\n", i - j);
-            j = 0; // reinicia j para buscar outras ocorrencias
-        }
-        // passo 6: se ha um mismatch
-        else if (i < n && string[i] != substring[j]) {
-            // passo 6a: se j eh zero
-            if (j == 0) {
-                i++; // avanca i, mantendo j em 0
-            }
-            // passo 6b: Se j eh maior que zero
-            else {
-                j = 0; // reinicia j, mas mantem i
-            }
-        }
-    }
-}
-        
-```
-
-
-:::
-???
-
-
-Essa abordagem é mais eficiente que a busca ingênua, pois evita retroceder no texto, mas ainda realiza 
- comparações redundantes, já que reinicia j para 0 em cada mismatch. Sua complexidade no pior caso pode 
- se aproximar de O(n * m), onde n é o tamanho do texto e m é o tamanho do padrão.
-
+Dessa forma, temos um entendimento claro do KMP: Dar Pulos que, por consequência, melhoram a complexidade do algoritimo. Porém, ainda é algo 
+difícil de mensurar, certo? Então, vamos agora para o coração do KMP, o vetor de identificação de padrões LPS.
 
 ## Retirando a Redundância: O Vetor de LPS
 
