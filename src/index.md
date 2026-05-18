@@ -4,7 +4,7 @@ O Algoritmo de Bentley-Ottmann
 Detectando interseções entre segmentos de reta
 ----------------------------------------------
 
-Nas últimas aulas nós aprendemos sobre algoritmos de ordenação como o merge sort, quick sort e insertion sort. O objetivo dessa aula será apresentar um novo algoritmo, dessa vez voltado para resolver problemas geométricos em larga escala.
+ O objetivo dessa aula será apresentar um novo algoritmo, dessa vez voltado para resolver problemas geométricos em larga escala.
 
 Imagine um conjunto de segmentos de reta no plano, e que nosso objetivo é encontrar todos os pontos onde eles se cruzam. Esse problema aparece no projeto de circuitos impressos (para detectar trilhas que se tocam indevidamente numa PCB) e em computação gráfica (para calcular sobreposição entre polígonos).
 
@@ -17,6 +17,11 @@ Neste handout, vamos construir esse algoritmo do zero.
 
 Formalmente:
 
+Antes de pensar nos algoritmos, precisamos definir claramente o problema com base em suas entradas e saídas:
+
+* **Entrada:** Um conjunto de $n$ segmentos de reta, onde cada segmento é determinado pelas coordenadas de seus dois extremos: $(x_1, y_1)$ e $(x_2, y_2)$.
+* **Saída:** A quantidade $k$ de interseções encontradas e, para cada uma delas, as coordenadas $(x, y)$ do ponto de cruzamento.
+
 !!! Definição
 Dados $n$ segmentos de reta no plano, encontrar todos os pontos onde dois ou mais desses segmentos se cruzam.
 !!!
@@ -24,22 +29,6 @@ Dados $n$ segmentos de reta no plano, encontrar todos os pontos onde dois ou mai
 Chamamos de $k$ o número de interseções encontradas.
 
 ??? Atividade 1
-
-Antes de pensar em algoritmos, vamos deixar claro qual é a entrada e qual é a saída do problema. Se você fosse escrever uma função que resolve esse problema, qual seria o tipo da entrada? E qual seria o tipo da saída?
-
-::: Gabarito
-A **entrada** são $n$ segmentos de reta. Cada segmento é definido pelas coordenadas de seus dois extremos: $(x_1, y_1)$ e $(x_2, y_2)$.
-
-A **saída** é a quantidade $k$ de interseções encontradas e, para cada uma, as coordenadas $(x, y)$ do ponto de cruzamento.
-
-Note a diferença: a entrada tem tamanho proporcional a $n$, e a saída tem tamanho proporcional a $k$. Como qualquer algoritmo precisa ler toda a entrada e escrever toda a saída, $n + k$ é o mínimo de passos possíveis.
-:::
-
-???
-
-![](img/problema-geral.png)
-
-??? Atividade 2
 
 Quais são os valores mínimo e máximo possíveis de $k$, em função de $n$?
 
@@ -54,20 +43,43 @@ O ponto é que $k$ varia muito: de zero até a ordem de $n^2$. O tamanho da saí
 ???
 
 
+
 ## A abordagem ingênua
 
-A solução óbvia é testar todos os pares de segmentos: para cada par, verificamos se eles se cruzam e, em caso positivo, calculamos o ponto de interseção. Como existem cerca de $n^2/2$ pares de segmentos e cada teste pode ser feito em tempo constante, o tempo total é $O(n^2)$.
+??? Atividade 2
+
+Considere que o algoritmo ingênuo precisa testar todos os pares possíveis de segmentos. Se denotarmos o número total de pares únicos como uma combinação de $n$ elementos tomados de 2 em 2, como podemos expressar analiticamente a quantidade total de testes realizados em função de $n$? Demonstre como isso nos leva à complexidade de tempo final.
+
+::: Gabarito
+Para encontrar o número total de pares únicos, utilizamos a combinação simples:
+
+$$\binom{n}{2} = \frac{n(n-1)}{2} = \frac{n^2 - n}{2}$$
+
+Para valores muito grandes de $n$, o termo $n^2$ domina a expressão. Assim, o número de pares únicos é aproximadamente $n^2/2$.
+
+Como cada teste individual de interseção entre dois segmentos é feito em tempo constante, ou seja, $O(1)$, multiplicamos o número de testes pelo custo de cada um:
+
+$$\text{Tempo Total} = \frac{n^2 - n}{2} \times O(1) = O(n^2)$$
+
+Portanto, a complexidade de tempo total da abordagem ingênua é $O(n^2)$.
+:::
+
+???
+
+![](demonstracao-ingenuo.png)
 
 ??? Atividade 3
 
-Considere uma placa de circuito impresso com $n = 10\,000$ trilhas, das quais apenas 50 acabam se cruzando indevidamente (causando curtos-circuitos). Por que dizemos que o algoritmo ingênuo é ineficiente nesse caso?
+Observando a imagem, com aproximadamente 35 trilhas e poucas interseções visíveis, por que podemos afirmar que o método ingênuo é ineficiente para esse caso?
 
-**Dica**: quantos pares de trilhas são testados no total? Quantos desses testes realmente retornam um cruzamento?
+**Dica**: quantos pares de trilhas o algoritmo precisa testar no total? Desses pares, quantos de fato se cruzam?
 
 ::: Gabarito
-Com $n = 10\,000$, o ingênuo faz cerca de $5 \times 10^7$ testes. Desses cinquenta milhões, apenas 50 retornam uma interseção. O resto é descartado.
+Com $n \approx 35$ trilhas, o método ingênuo testa todos os pares possíveis, ou seja, $\binom{35}{2} = 595$ testes. Olhando a imagem, porém, vemos apenas algumas poucas interseções reais. A grande maioria dos testes é desperdiçada em pares de trilhas que estão em regiões completamente diferentes da placa e que obviamente não se cruzam.
 
-Quase todos os testes são feitos em pares de trilhas que estão em regiões completamente diferentes da placa e que obviamente não se cruzam. Um olho humano descartaria esses pares de longe, sem fazer conta alguma. Como um algoritmo pode fazer algo parecido?
+Agora imagine essa mesma situação em uma escala muito maior: uma placa com centenas de milhares de trilhas, espaçadas de forma tão densa que nem conseguiríamos identificar todas as interseções a olho nu. O número de testes do método ingênuo cresce com $n^2$, enquanto o número de interseções reais tende a crescer de forma muito mais lenta. A desproporção entre testes feitos e testes úteis fica cada vez pior.
+
+Um olho humano descartaria de longe os pares que estão em regiões distantes, sem fazer conta nenhuma. A pergunta natural é: como um algoritmo pode fazer algo parecido, ou seja, evitar testar pares que claramente não se cruzam?
 :::
 
 ???
@@ -77,7 +89,7 @@ Quase todos os testes são feitos em pares de trilhas que estão em regiões com
 
 Para fazer melhor que $O(n^2)$, precisamos de uma forma de **evitar testar pares que claramente não se cruzam**. A varredura linear faz isso imaginando uma linha vertical que percorre o plano da esquerda para a direita. Em cada instante, essa linha, chamada **sweep line**, intersecta algum subconjunto dos segmentos, e podemos listá-los de cima para baixo. Essa é a **ordem vertical** dos segmentos naquele instante.
 
-:files
+:demonstracao-alto
 
 ??? Atividade 4
 
@@ -146,7 +158,9 @@ Com as atividades anteriores, a estratégia fica clara:
 
 5. Quando chegamos a um evento de interseção, reportamos o ponto e trocamos a posição dos dois segmentos na ordem.
 
-Note que os eventos de interseção não são conhecidos desde o início: eles são **descobertos durante a varredura**, conforme vizinhanças vão surgindo. A lista de eventos cresce dinamicamente.
+Note que os eventos de interseção não são conhecidos desde o início: eles são **descobertos durante a varredura**, conforme vizinhanças vão surgindo. A lista de eventos cresce dinamicamente como podemos ver a seguir.
+
+:simulacao-exata
 
 ??? Atividade 7
 
@@ -189,11 +203,13 @@ $$(2n + k) \times O(\log n) = O((n + k) \log n)$$
 
 ???
 
+![](pior-cenario.png)
+
 ??? Atividade 10
 
 Em que situações o Bentley-Ottmann é realmente melhor que o ingênuo? Existe algum caso em que o ingênuo é competitivo?
 
-**Dica**: compare as complexidades em dois extremos, $k = O(n)$ e $k = O(n^2)$.
+**Dica**: compare as complexidades em dois extremos, $k = O(n)$ e $k = O(n^2)$ e pense sobre a imagem.
 
 ::: Gabarito
 Com $k = O(n)$, o Bentley-Ottmann roda em $O(n \log n)$. Contra $O(n^2)$ do ingênuo, é uma melhoria gigante: para $n = 10\,000$, são $\sim 10^5$ operações contra $\sim 10^8$. Mil vezes mais rápido.
