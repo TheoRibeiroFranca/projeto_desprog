@@ -8,7 +8,7 @@ Detectando interseções entre segmentos de reta
 
 Imagine um conjunto de segmentos de reta no plano, e que nosso objetivo é encontrar todos os pontos onde eles se cruzam. Esse problema aparece no projeto de circuitos impressos (para detectar trilhas que se tocam indevidamente numa PCB) e em computação gráfica (para calcular sobreposição entre polígonos).
 
-A solução ingênua é testar todos os pares de segmentos e tem complexidade $O(n^2)$, independentemente de quantas interseções existam de fato. O algoritmo de Bentley-Ottmann resolve o mesmo problema em $O((n + k) \log n)$, onde $k$ é o número de interseções efetivamente encontradas. Quando $k$ é pequeno, isso é muito melhor. E a técnica que ele usa, a **varredura linear**, é um dos pilares da geometria computacional.
+A solução ingênua é testar todos os pares de segmentos independentemente de quantas interseções existem de fato. O algoritmo de Bentley-Ottmann surge para resolver o mesmo problema de forma mais eficaz. A técnica que ele usa, a **varredura linear**, é um dos pilares da geometria computacional e será aprofundada na aula de hoje.
 
 Neste handout, vamos construir esse algoritmo do zero.
 
@@ -234,4 +234,4 @@ Conclusão: o Bentley-Ottmann vence quando $k$ é pequeno em relação a $n^2$, 
 
 4. **Ideia central**: uma sweep line percorre o plano da esquerda para a direita. Só pares que se tornam vizinhos na ordem vertical podem se cruzar, então o algoritmo testa cruzamentos apenas entre vizinhos. A varredura salta entre eventos discretos: extremos de segmentos e interseções descobertas.
 
-5. **Eficiência**: $2n + k$ eventos, cada um em $O(\log n)$, totalizando $O((n + k) \log n)$.
+5. **Eficiência**: $2n + k$ eventos, cada um com complexidade $O(\log n)$, totalizando $O((n + k) \log n)$.
