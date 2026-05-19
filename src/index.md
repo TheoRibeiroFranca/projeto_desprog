@@ -121,13 +121,15 @@ Logo, imediatamente antes de um cruzamento, os dois segmentos envolvidos precisa
 
 Essa é a observação central do algoritmo: **só precisamos testar pares que se tornem vizinhos em algum momento da varredura**.
 
+:slides
+
 Resta um problema prático: uma sweep line contínua é uma ficção. Computadores são discretos.
 
 ??? Atividade 6
 
 A ordem vertical dos segmentos na sweep line muda ao longo do tempo, mas ela não muda o tempo todo. Há instantes específicos em que a ordem se altera. Tente identificar que tipos de acontecimento fazem a ordem mudar.
 
-**Dica**: pense em três situações distintas que a imagem apresenta.
+**Dica**: Olhando a animação anterior, pense em três situações distintas em que a fila da ordem vertical realmente muda.
 
 ::: Gabarito
 A ordem muda em três tipos de acontecimento, que chamaremos de **eventos**:
